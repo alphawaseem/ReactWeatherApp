@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 import logo from './img/sun_and_clouds.png';
+import Rodal from 'rodal';
+import 'rodal/lib/rodal.css';
 import './App.css';
 const weatherApiKey = '373a5cf6b3655712';
 
@@ -29,14 +31,42 @@ class App extends Component {
     return (
       <div className="text-center">
           <img src={logo} className="App-logo" alt="logo" />
-          <h2>React Weather App</h2>
+          <h1>React Weather App</h1>
           <Location />
           <Temperatue celsius="20" color="orange"/>
        </div>
     );
   }
 }
+export class Location extends Component {
+    constructor(props){
+      super(props);
+      this.state = {visible : false};
+      this.city = props.city;
+    }
+    show(){
+      this.setState({visible:true})
+    }
 
+    hide(){
+      this.setState({visible:false})
+    }
+
+    render(){
+      return (
+      <div>
+        <h3 onClick={this.show.bind(this)}>Hassan </h3>
+            <Rodal visible={this.state.visible} animation="rotate" onClose={this.hide.bind(this)}>
+              <div>
+                <h1>Select your location</h1>
+                 <input type="search" placeholder="Search your city" />
+                 <ul><li></li></ul>
+              </div>
+            </Rodal>
+      </div>
+      )
+    }
+}
 export class Temperatue extends Component{
   constructor(props){
     super(props);
