@@ -3,28 +3,13 @@ import logo from './img/sun_and_clouds.png';
 import Rodal from 'rodal';
 import 'rodal/lib/rodal.css';
 import './App.css';
+import {WeatherAPI} from './services/weatherService';
 const weatherApiKey = '373a5cf6b3655712';
-
-export class WeatherAPI {
-  apiKey ;
-  currentCity;
-  constructor(apiKey,city,country){
-    this.apiKey = apiKey;
-    this.currentCity = city;
-    this.country = country;
-  }
-  getForecast(){
-    let hourlyForecastUrl = `http://api.wunderground.com/api/${this.apiKey}/hourly/q/${this.country}/${this.currentCity}.json`;
-    return fetch(hourlyForecastUrl).then(response=>{
-      return response.json();
-    });
-  }
-}
 
 class App extends Component {
   constructor(props){
     super(props);
-    let weather = new WeatherAPI(weatherApiKey,'Hassan','India');
+    let weather = new WeatherAPI(weatherApiKey);
     weather.getForecast().then(res => console.log(res));
   }
   render() {
@@ -32,8 +17,9 @@ class App extends Component {
       <div className="text-center">
           <img src={logo} className="App-logo" alt="logo" />
           <h1>React Weather App</h1>
-          <Location />
+          <Location city="Mysore" />
           <Temperatue celsius="20" color="orange"/>
+          <h4>Cloudy</h4>
        </div>
     );
   }
@@ -41,8 +27,7 @@ class App extends Component {
 export class Location extends Component {
     constructor(props){
       super(props);
-      this.state = {visible : false};
-      this.city = props.city;
+      this.state = {visible : false,city:props.city,search:''};
     }
     show(){
       this.setState({visible:true})
@@ -51,21 +36,51 @@ export class Location extends Component {
     hide(){
       this.setState({visible:false})
     }
+    locateUser(){
+      let geo_options = {
+        enableHighAccuracy: true, 
+        maximumAge        : 30000, 
+        timeout           : 27000
+      };
+      if ("geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition(position => {
+          console.log('locating')
+            let lat = position.coords.latitude; 
+            let lng = position.coords.longitude;
+            let findCityUrl = `http://api.wunderground.com/api/373a5cf6b3655712/geolookup/q/${lat},${lng}.json`;
+            fetch(findCityUrl).then(res => {
+              return res.json();
+          }).then( res=> {
+            this.setState({city :res.location.city});
+            this.hide();
+          });
+        },error => alert('something went wrong'),geo_options);
+       } else {
+        alert('no support');
+      }
+    }
 
     render(){
+      let pushPinStyle = {
+        color : 'orange',
+        cursor : 'pointer'
+      }
       return (
       <div>
-        <h3 onClick={this.show.bind(this)}>Hassan </h3>
+        <h3>{this.state.city} <span onClick={this.show.bind(this)} style={pushPinStyle}>📌 </span> </h3>
             <Rodal visible={this.state.visible} animation="rotate" onClose={this.hide.bind(this)}>
               <div>
                 <h1>Select your location</h1>
                  <input type="search" placeholder="Search your city" />
                  <ul><li></li></ul>
+                 <h3>OR</h3>
+                 <button onClick={this.locateUser.bind(this)}>Geo Locate</button>
               </div>
             </Rodal>
       </div>
       )
     }
+
 }
 export class Temperatue extends Component{
   constructor(props){
