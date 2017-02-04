@@ -9,14 +9,16 @@ const weatherApiKey = '373a5cf6b3655712';
 class App extends Component {
   constructor(props){
     super(props);
-    let weather = new WeatherAPI(weatherApiKey);
-    weather.getForecast().then(res => console.log(res));
+    this.weather = new WeatherAPI(weatherApiKey);
+    this.state = {lat:''};
+    
   }
   render() {
     return (
       <div className="text-center">
           <img src={logo} className="App-logo" alt="logo" />
           <h1>React Weather App</h1>
+          <h2>Lat is {this.state.lat}</h2>
           <Location city="Mysore" />
           <Temperatue celsius="20" color="orange"/>
           <h4>Cloudy</h4>
@@ -37,27 +39,7 @@ export class Location extends Component {
       this.setState({visible:false})
     }
     locateUser(){
-      let geo_options = {
-        enableHighAccuracy: true, 
-        maximumAge        : 30000, 
-        timeout           : 27000
-      };
-      if ("geolocation" in navigator) {
-        navigator.geolocation.getCurrentPosition(position => {
-          console.log('locating')
-            let lat = position.coords.latitude; 
-            let lng = position.coords.longitude;
-            let findCityUrl = `http://api.wunderground.com/api/373a5cf6b3655712/geolookup/q/${lat},${lng}.json`;
-            fetch(findCityUrl).then(res => {
-              return res.json();
-          }).then( res=> {
-            this.setState({city :res.location.city});
-            this.hide();
-          });
-        },error => alert('something went wrong'),geo_options);
-       } else {
-        alert('no support');
-      }
+      
     }
 
     render(){
